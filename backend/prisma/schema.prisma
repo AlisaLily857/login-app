@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String?
+  name      String?
+  avatar    String?
+  phone     String?  @unique
+  bio       String?
+  
+  // 认证状态
+  isEmailVerified Boolean @default(false)
+  isPhoneVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  
+  // 角色和权限
+  role      Role     @default(USER)
+  status    UserStatus @default(ACTIVE)
+  
+  // 安全
+  mfaEnabled    Boolean @default(false)
+  mfaSecret     String?
+  mfaMethod     MfaMethod?
+  
+  // 登录统计
+  loginCount    Int     @default(0)
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+  failedAttempts Int    @default(0)
+  lockedUntil   DateTime?
+  
+  // 时间戳
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  // 关联
+  oauthAccounts OAuthAccount[]
+  sessions      Session[]
+  loginHistories LoginHistory[]
+  devices       Device[]
+  refreshTokens RefreshToken[]
+  
+  @@map("users")
+}
+
+model OAuthAccount {
+  id          String @id @default(uuid())
+  userId      String
+  provider    String // google, github, wechat
+  providerAccountId String
+  
+  // OAuth 详情
+  accessToken   String?
+  refreshToken  String?
+  expiresAt     DateTime?
+  tokenType     String?
+  scope         String?
+  
+  // 用户信息
+  email     String?
+  name      String?
+  avatar    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("oauth_accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  
+  // 设备信息
+  deviceId    String?
+  ipAddress   String?
+  userAgent   String?
+  
+  // 状态
+  isValid   Boolean  @default(true)
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  
+  // 设备信息
+  deviceId    String?
+  ipAddress   String?
+  
+  // 状态
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  
+  // 登录信息
+  ipAddress   String
+  userAgent   String?
+  deviceType  String? // desktop, mobile, tablet
+  os          String?
+  browser     String?
+  location    String?
+  
+  // 登录结果
+  status      LoginStatus
+  failureReason String?
+  
+  // MFA
+  mfaUsed     Boolean   @default(false)
+  mfaMethod   MfaMethod?
+  
+  createdAt   DateTime  @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@map("login_histories")
+}
+
+model Device {
+  id        String   @id @default(uuid())
+  userId    String
+  
+  // 设备信息
+  name        String
+  type        DeviceType
+  os          String?
+  osVersion   String?
+  browser     String?
+  browserVersion String?
+  
+  // 设备标识
+  fingerprint String   @unique
+  
+  // 状态
+  isTrusted   Boolean  @default(false)
+  isCurrent   Boolean  @default(false)
+  lastActive  DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("devices")
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String?
+  phone     String?
+  code      String
+  
+  // 验证类型
+  type      VerificationType
+  
+  // 状态
+  isUsed    Boolean  @default(false)
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  
+  @@index([email, phone])
+  @@map("verification_codes")
+}
+
+// 审计日志
+model AuditLog {
+  id        String   @id @default(uuid())
+  
+  // 操作信息
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  resource  String   // user, device, setting, etc.
+  resourceId String?
+  
+  // 用户信息
+  userId    String?
+  userEmail String?
+  
+  // 请求信息
+  ipAddress   String?
+  userAgent   String?
+  
+  // 变更详情
+  oldValue    Json?
+  newValue    Json?
+  
+  // 结果
+  status      String   // SUCCESS, FAILURE
+  errorMessage String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+// 系统设置
+model SystemSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+  
+  // 描述
+  label       String?
+  description String?
+  
+  // 类型
+  type        String   // string, number, boolean, json
+  
+  // 分类
+  category    String   // security, email, oauth, general
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("system_settings")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum MfaMethod {
+  TOTP
+  SMS
+  EMAIL
+}
+
+enum LoginStatus {
+  SUCCESS
+  FAILED
+  MFA_REQUIRED
+  LOCKED
+}
+
+enum DeviceType {
+  DESKTOP
+  MOBILE
+  TABLET
+  UNKNOWN
+}
+
+enum VerificationType {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  PASSWORD_RESET
+  MFA_SETUP
+  ACCOUNT_DELETION
+}
