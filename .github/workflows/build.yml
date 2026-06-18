@@ -101,6 +101,7 @@ jobs:
           npm ci
           cd desktop && npm ci
           cd ../web && npm ci && npm run build
+          cd ..
           xcopy /E /I web\dist desktop\build
       
       - name: Build Windows Installer
