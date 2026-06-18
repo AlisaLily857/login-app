@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '@shared/hooks/useToast';
-import { useLanguage } from '@shared/hooks/useLanguage';
-import { useTheme } from '@shared/hooks/useTheme';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
-import BiometricAuth from './components/BiometricAuth';
+import { useAuth } from './hooks/useAuth';
+import { useToast } from './hooks/useToast';
+import { useLanguage } from './hooks/useLanguage';
+import { useTheme } from './hooks/useTheme';
+import { ThemeToggle, LanguageToggle } from './components/ui/ToggleButtons';
+import { Navigation } from './components/layout/Navigation';
+import { ProfileView } from './components/pages/ProfileView';
+import LoginForm from './components/forms/LoginForm';
+import RegisterForm from './components/forms/RegisterForm';
 import MessageCenter from './components/MessageCenter';
 import Achievements from './components/Achievements';
 import StatsDashboard from './components/StatsDashboard';
-import { authApi } from './utils/api';
+import { authApi } from './services/api';
 import './App.css';
 
 type View = 'login' | 'register' | 'profile' | 'messages' | 'achievements' | 'stats';
@@ -18,8 +20,8 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('login');
   const { isAuthenticated, user, login, register, logout } = useAuth();
   const { showToast } = useToast();
-  const { t, lang, toggleLanguage } = useLanguage();
-  const { theme, isDark, setMode } = useTheme();
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   const handleLogin = async (email: string, password: string) => {
     const success = await login(email, password);
@@ -65,84 +67,6 @@ const App: React.FC = () => {
     setCurrentView('login');
   };
 
-  const ThemeToggle = () => (
-    <button className="theme-toggle" onClick={() => setMode(isDark ? 'light' : 'dark')}>
-      {isDark ? '☀️' : '🌙'}
-    </button>
-  );
-
-  const LanguageToggle = () => (
-    <button className="language-toggle" onClick={toggleLanguage}>
-      {lang === 'zh' ? 'EN' : '中'}
-    </button>
-  );
-
-  const Navigation = () => (
-    <nav className="app-nav">
-      <button 
-        className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
-        onClick={() => setCurrentView('profile')}
-      >
-        👤 个人资料
-      </button>
-      <button 
-        className={`nav-item ${currentView === 'messages' ? 'active' : ''}`}
-        onClick={() => setCurrentView('messages')}
-      >
-        📬 消息中心
-      </button>
-      <button 
-        className={`nav-item ${currentView === 'achievements' ? 'active' : ''}`}
-        onClick={() => setCurrentView('achievements')}
-      >
-        🏆 成就
-      </button>
-      <button 
-        className={`nav-item ${currentView === 'stats' ? 'active' : ''}`}
-        onClick={() => setCurrentView('stats')}
-      >
-        📊 统计
-      </button>
-      <button className="nav-item logout" onClick={handleLogout}>
-        🚪 退出
-      </button>
-    </nav>
-  );
-
-  const ProfileView = () => (
-    <div className="profile-view">
-      <div className="profile-header">
-        <div className="profile-avatar">
-          {user?.avatar ? (
-            <img src={user.avatar} alt="avatar" />
-          ) : (
-            <div className="avatar-placeholder">{user?.name?.[0] || 'U'}</div>
-          )}
-        </div>
-        <div className="profile-info">
-          <h2>{user?.name || user?.username}</h2>
-          <p>{user?.email}</p>
-        </div>
-      </div>
-
-      <div className="profile-stats">
-        <div className="stat-item">
-          <span className="stat-value">{user?.loginCount || 0}</span>
-          <span className="stat-label">登录次数</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{user?.isEmailVerified ? '✅' : '❌'}</span>
-          <span className="stat-label">邮箱验证</span>
-        </div>
-      </div>
-
-      <BiometricAuth 
-        email={user?.email || ''} 
-        onSuccess={handleBiometricSuccess} 
-      />
-    </div>
-  );
-
   return (
     <div className={`app ${isDark ? 'dark' : 'light'}`}>
       <header className="app-header">
@@ -153,7 +77,13 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {isAuthenticated && <Navigation />}
+      {isAuthenticated && (
+        <Navigation 
+          currentView={currentView} 
+          onViewChange={setCurrentView} 
+          onLogout={handleLogout} 
+        />
+      )}
 
       <main className="app-main">
         {!isAuthenticated ? (
@@ -176,7 +106,7 @@ const App: React.FC = () => {
           )
         ) : (
           <>
-            {currentView === 'profile' && <ProfileView />}
+            {currentView === 'profile' && <ProfileView onBiometricSuccess={handleBiometricSuccess} />}
             {currentView === 'messages' && <MessageCenter />}
             {currentView === 'achievements' && <Achievements />}
             {currentView === 'stats' && <StatsDashboard />}
