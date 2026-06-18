@@ -1,17 +1,18 @@
-import React from 'react';
-import { useAuth } from '@shared/hooks/useAuth';
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '@shared/hooks/useToast';
 import { useLanguage } from '@shared/hooks/useLanguage';
 import { useTheme } from '@shared/hooks/useTheme';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
+import { authApi } from './utils/api';
 import './App.css';
 
 type View = 'login' | 'register' | 'profile';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = React.useState<View>('login');
-  const { isAuthenticated, user, login, register, logout } = useAuth();
+  const [currentView, setCurrentView] = useState<View>('login');
+  const { isAuthenticated, user, login, register, logout, fetchCurrentUser } = useAuth();
   const { showToast } = useToast();
   const { t, lang, toggleLanguage } = useLanguage();
   const { theme, isDark, setMode } = useTheme();
@@ -37,18 +38,38 @@ const App: React.FC = () => {
   };
 
   const handleVerifyEmail = async (email: string): Promise<boolean> => {
-    console.log('发送验证码到:', email);
-    showToast('info', '验证码已发送');
-    return true;
+    try {
+      await authApi.sendVerificationCode({ email, type: 'EMAIL_VERIFICATION' });
+      showToast('info', '验证码已发送');
+      return true;
+    } catch (error) {
+      showToast('error', '发送验证码失败');
+      return false;
+    }
   };
 
-  const handleGoogleLogin = () => showToast('info', 'Google 登录');
-  const handleGitHubLogin = () => showToast('info', 'GitHub 登录');
-  const handleWeChatLogin = () => showToast('info', '微信登录');
-  const handlePhoneLogin = () => showToast('info', '手机号登录');
+  const handleGoogleLogin = () => {
+    showToast('info', 'Google 登录');
+    // TODO: 实现 Google OAuth 跳转
+  };
 
-  const handleLogout = () => {
-    logout();
+  const handleGitHubLogin = () => {
+    showToast('info', 'GitHub 登录');
+    // TODO: 实现 GitHub OAuth 跳转
+  };
+
+  const handleWeChatLogin = () => {
+    showToast('info', '微信登录');
+    // TODO: 实现微信 OAuth 跳转
+  };
+
+  const handlePhoneLogin = () => {
+    showToast('info', '手机号登录');
+    // TODO: 实现手机号登录
+  };
+
+  const handleLogout = async () => {
+    await logout();
     showToast('info', '已退出登录');
     setCurrentView('login');
   };

@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { LoginFormProps, PasswordStrength } from '@shared/types';
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '@shared/hooks/useToast';
 import { useLanguage } from '@shared/hooks/useLanguage';
+import { LoginFormProps, PasswordStrength } from '@shared/types';
+import { authApi } from '../utils/api';
 import './LoginForm.css';
 
 const LoginForm: React.FC<LoginFormProps> = ({ 
@@ -18,6 +21,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({ score: 0, label: '', color: '' });
   const { t } = useLanguage();
+  const { showToast } = useToast();
 
   const checkPasswordStrength = (pwd: string): PasswordStrength => {
     let score = 0;
@@ -26,7 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     if (/\d/.test(pwd)) score++;
     if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score++;
 
-  const strengthMap: Record<number, { label: string; color: string }> = {
+    const strengthMap: Record<number, { label: string; color: string }> = {
       0: { label: t('password.empty'), color: '#e0e0e0' },
       1: { label: t('password.weak'), color: '#e74c3c' },
       2: { label: t('password.medium'), color: '#f39c12' },
@@ -36,10 +40,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
     return { score, ...strengthMap[score] };
   };
-
-  useEffect(() => {
-    setPasswordStrength(checkPasswordStrength(password));
-  }, [password]);
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -54,12 +54,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+    
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onSubmit?.(email, password);
+      await onSubmit?.(email, password);
     } catch (error) {
-      console.error('登录失败:', error);
+      showToast('error', error instanceof Error ? error.message : '登录失败');
     } finally {
       setIsLoading(false);
     }
