@@ -5,3 +5,4 @@ export * from './hooks/useTheme';
 export * from './hooks/useLanguage';
 export * from './hooks/useCaptcha';
 export * from './utils';
+export * from './hooks/usePerformance';
