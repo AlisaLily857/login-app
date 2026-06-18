@@ -18,13 +18,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          npm ci
-          cd web && npm ci
+        run: npm ci
       
       - name: Build Web
         run: cd web && npm run build
@@ -44,22 +42,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
       
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
       
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
       
-      - name: Install dependencies
+      - name: Accept Android licenses and install platform 36
         run: |
-          npm ci
-          cd mobile && npm ci
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
+      
+      - name: Install dependencies
+        run: npm ci
       
       - name: Build Android APK
         run: |
@@ -93,21 +94,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
       
-      - name: Install dependencies
+      - name: Install dependencies and build web assets
         run: |
           npm ci
-          cd desktop && npm ci
-          cd ../web && npm ci && npm run build
+          cd web && npm run build
+          cd ..\desktop
+          mkdir build
           cd ..
           xcopy /E /I web\dist desktop\build
       
       - name: Build Windows Installer
-        run: |
-          cd desktop
-          npm run build:win
+        run: cd desktop && npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       

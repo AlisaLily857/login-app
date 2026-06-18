@@ -8,6 +8,9 @@
     "mobile",
     "desktop"
   ],
+  "engines": {
+    "node": ">= 22.11.0"
+  },
   "scripts": {
     "web": "cd web && npm run dev",
     "web:build": "cd web && npm run build",
@@ -19,12 +22,15 @@
     "backend:build": "cd backend && npm run build",
     "typecheck": "cd backend && npx tsc --noEmit && cd ../web && npx tsc --noEmit"
   },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-native": "^0.72.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "@types/react": "^19.2.17",
+    "typescript": "^5.8.3",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0"
   }
 }
