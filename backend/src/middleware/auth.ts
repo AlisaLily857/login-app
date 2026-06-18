@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma';
+import config from '../config';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -26,7 +27,7 @@ export const authenticate = async (
 
     const token = authHeader.substring(7);
     
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const decoded = jwt.verify(token, config.jwt.secret) as {
       userId: string;
       type: string;
     };
@@ -94,7 +95,7 @@ export const optionalAuth = async (
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const decoded = jwt.verify(token, config.jwt.secret) as {
       userId: string;
     };
 

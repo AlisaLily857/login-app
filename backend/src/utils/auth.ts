@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { prisma } from './prisma';
+import config from '../config';
 
 // 密码加密
 export const hashPassword = async (password: string): Promise<string> => {
@@ -12,6 +13,7 @@ export const hashPassword = async (password: string): Promise<string> => {
 };
 
 export const comparePassword = async (password: string, hash: string): Promise<boolean> => {
+  if (!hash) return false;
   return bcrypt.compare(password, hash);
 };
 
@@ -19,16 +21,16 @@ export const comparePassword = async (password: string, hash: string): Promise<b
 export const generateAccessToken = (userId: string): string => {
   return jwt.sign(
     { userId, type: 'access' },
-    process.env.JWT_SECRET!,
-    { expiresIn: '15m' }
+    config.jwt.secret,
+    { expiresIn: config.jwt.expiresIn }
   );
 };
 
 export const generateRefreshToken = (userId: string): string => {
   return jwt.sign(
     { userId, type: 'refresh', jti: uuidv4() },
-    process.env.JWT_REFRESH_SECRET!,
-    { expiresIn: '7d' }
+    config.jwt.refreshSecret,
+    { expiresIn: config.jwt.refreshExpiresIn }
   );
 };
 
@@ -38,6 +40,14 @@ export const verifyToken = (token: string, secret: string): any => {
   } catch (error) {
     return null;
   }
+};
+
+export const verifyAccessToken = (token: string): any => {
+  return verifyToken(token, config.jwt.secret);
+};
+
+export const verifyRefreshToken = (token: string): any => {
+  return verifyToken(token, config.jwt.refreshSecret);
 };
 
 // 验证码生成
@@ -57,7 +67,7 @@ export const generateDeviceFingerprint = (userAgent: string, ip: string): string
 // MFA
 export const generateMFASecret = (): { secret: string; otpauthUrl: string } => {
   const secret = speakeasy.generateSecret({
-    name: 'Login App',
+    name: config.webauthn.rpName,
     length: 32,
   });
 
@@ -86,8 +96,62 @@ export const isAccountLocked = (lockedUntil: Date | null): boolean => {
   return new Date() < lockedUntil;
 };
 
-// IP 解析（简化版）
-export const getLocationFromIP = async (ip: string): Promise<string> => {
-  // TODO: 集成 IP 地理位置服务
-  return 'Unknown';
+// 获取客户端 IP
+export const getClientIP = (req: any): string => {
+  return req.ip || 
+    req.headers['x-forwarded-for'] || 
+    req.headers['x-real-ip'] || 
+    req.socket?.remoteAddress || 
+    'unknown';
+};
+
+// 解析 User-Agent
+export const parseUserAgent = (userAgent: string): { browser: string; os: string; device: string } => {
+  const ua = userAgent || '';
+  
+  // 简单的 UA 解析
+  const browser = ua.includes('Chrome') ? 'Chrome' :
+    ua.includes('Firefox') ? 'Firefox' :
+    ua.includes('Safari') ? 'Safari' :
+    ua.includes('Edge') ? 'Edge' : 'Unknown';
+    
+  const os = ua.includes('Windows') ? 'Windows' :
+    ua.includes('Mac') ? 'macOS' :
+    ua.includes('Linux') ? 'Linux' :
+    ua.includes('Android') ? 'Android' :
+    ua.includes('iOS') ? 'iOS' : 'Unknown';
+    
+  const device = ua.includes('Mobile') ? 'Mobile' : 'Desktop';
+  
+  return { browser, os, device };
+};
+
+// 密码强度检查
+export const checkPasswordStrength = (password: string): { 
+  score: number; 
+  isStrong: boolean; 
+  feedback: string[] 
+} => {
+  const feedback: string[] = [];
+  let score = 0;
+  
+  if (password.length >= 8) score += 1;
+  else feedback.push('密码至少8位');
+  
+  if (password.length >= 12) score += 1;
+  if (/[a-z]/.test(password)) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  else feedback.push('需要大写字母');
+  
+  if (/\d/.test(password)) score += 1;
+  else feedback.push('需要数字');
+  
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+  else feedback.push('需要特殊字符');
+  
+  return {
+    score,
+    isStrong: score >= 4,
+    feedback,
+  };
 };

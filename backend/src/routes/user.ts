@@ -7,7 +7,8 @@ import {
   removeDevice,
   trustDevice,
   deleteAccount,
-} from '../controllers/userController';
+} from '../controllers/user';
+import { getCurrentUser } from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -30,6 +31,3 @@ router.post('/devices/:deviceId/trust', trustDevice);
 router.delete('/account', deleteAccount as any);
 
 export default router;
-
-// 需要导入
-import { getCurrentUser } from '../controllers/authController';
