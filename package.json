@@ -1,0 +1,29 @@
+{
+  "name": "login-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "web",
+    "mobile",
+    "desktop"
+  ],
+  "scripts": {
+    "web": "cd web && npm start",
+    "web:build": "cd web && npm run build",
+    "mobile": "cd mobile && npx react-native start",
+    "mobile:android": "cd mobile && npx react-native run-android",
+    "desktop": "cd desktop && npm start",
+    "desktop:build": "cd desktop && npm run build",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.72.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  }
+}
