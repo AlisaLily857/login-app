@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import { securityHeaders, corsConfig, preventParameterPollution, mongoSanitizeConfig, globalRateLimit, sqlInjectionCheck, auditLog, requestId, performanceMonitor } from './middleware/security';
+import { securityHeaders, corsConfig, preventParameterPollution, mongoSanitizeConfig, globalRateLimit, auditLog, requestId, performanceMonitor } from './middleware/security';
 import { errorHandler } from './middleware/validate';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
@@ -21,8 +21,7 @@ app.use(express.json({ limit: '10kb' }));  // 5. JSON解析
 app.use(express.urlencoded({ extended: true, limit: '10kb' })); // 6. URL编码
 app.use(preventParameterPollution);    // 7. 参数污染防护
 app.use(mongoSanitizeConfig);          // 8. MongoDB注入防护
-app.use(sqlInjectionCheck);            // 9. SQL注入检测
-app.use(performanceMonitor);           // 10. 性能监控
+app.use(performanceMonitor);           // 9. 性能监控
 app.use(auditLog);                     // 11. 审计日志
 
 // 路由
@@ -52,9 +51,13 @@ app.use((req, res) => {
 // 错误处理
 app.use(errorHandler);
 
+import { initAchievements } from './controllers/achievementController';
+
+initAchievements().catch(console.error);
+
 const PORT = config.port;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api`);
   console.log(`🔒 Security headers enabled`);

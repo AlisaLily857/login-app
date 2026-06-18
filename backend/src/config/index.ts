@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-  port: parseInt(process.env.PORT || '6500', 10),
+  port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   
   database: {
@@ -11,8 +11,12 @@ export const config = {
   },
   
   jwt: {
-    secret: process.env.JWT_SECRET || 'default-jwt-secret-change-in-production',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-in-production',
+    secret: process.env.JWT_SECRET || (process.env.NODE_ENV === 'production'
+      ? (() => { throw new Error('JWT_SECRET is required in production'); })()
+      : 'dev-jwt-secret-change-in-production'),
+    refreshSecret: process.env.JWT_REFRESH_SECRET || (process.env.NODE_ENV === 'production'
+      ? (() => { throw new Error('JWT_REFRESH_SECRET is required in production'); })()
+      : 'dev-refresh-secret-change-in-production'),
     expiresIn: '15m',
     refreshExpiresIn: '7d',
   },

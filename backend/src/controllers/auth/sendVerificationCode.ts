@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { prisma } from '../utils/prisma';
-import { generateVerificationCode } from '../utils/auth';
-import { sendVerificationEmail } from '../utils/email';
-import { validate } from '../middleware/validate';
+import { prisma } from '../../utils/prisma';
+import { generateVerificationCode } from '../../utils/auth';
+import { sendVerificationEmail } from '../../utils/email';
+import { validate } from '../../middleware/validate';
 
 export const sendVerificationCode = [
   body('email').isEmail().normalizeEmail().withMessage('请输入有效的邮箱地址'),

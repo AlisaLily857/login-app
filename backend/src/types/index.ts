@@ -1,3 +1,17 @@
+import type { Request } from 'express';
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      role: string;
+    }
+  }
+}
+
+export type AuthRequest = Request;
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;

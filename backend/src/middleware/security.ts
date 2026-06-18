@@ -70,9 +70,11 @@ export const mongoSanitizeConfig = mongoSanitize({
   },
 });
 
+const GLOBAL_WINDOW_MS = 15 * 60 * 1000;
+
 // 全局限流配置
 export const globalRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
+  windowMs: GLOBAL_WINDOW_MS, // 15分钟
   max: 100, // 每个 IP 100 次请求
   standardHeaders: true,
   legacyHeaders: false,
@@ -80,7 +82,7 @@ export const globalRateLimit = rateLimit({
   handler: (req, res) => {
     res.status(429).json({
       error: '请求过于频繁',
-      retryAfter: Math.ceil(req.rateLimit.resetTime / 1000),
+      retryAfter: Math.ceil(((req as any).rateLimit?.resetTime ?? Date.now() + GLOBAL_WINDOW_MS) / 1000),
     });
   },
 });
@@ -116,33 +118,6 @@ export const handleValidationErrors = (
     });
     return;
   }
-  next();
-};
-
-// SQL 注入检测
-export const sqlInjectionCheck = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const sqlPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT|APPLET|OBJECT|EMBED|FORM|IFRAME|FRAME)\b)|(--|\/\*|\*\/|';|"|;|#)/i;
-  
-  const checkValue = (value: any): boolean => {
-    if (typeof value === 'string') {
-      return sqlPattern.test(value);
-    }
-    if (typeof value === 'object' && value !== null) {
-      return Object.values(value).some(checkValue);
-    }
-    return false;
-  };
-
-  if (checkValue(req.body) || checkValue(req.query) || checkValue(req.params)) {
-    console.warn('检测到 SQL 注入尝试:', req.ip, req.path);
-    res.status(400).json({ error: '非法输入' });
-    return;
-  }
-
   next();
 };
 

@@ -67,6 +67,7 @@ jobs:
           ./gradlew assembleRelease
       
       - name: Sign APK
+        if: ${{ secrets.SIGNING_KEY != '' }}
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: mobile/android/app/build/outputs/apk/release

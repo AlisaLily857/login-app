@@ -4,6 +4,11 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  esbuild: {
+    include: [/\.tsx?$/, /\.jsx?$/],
+    exclude: [],
+    loader: 'tsx',
+  },
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, '../shared'),
@@ -11,10 +16,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 6500,
+    port: 5173,
+    host: "0.0.0.0",
     proxy: {
       '/api': {
-        target: 'http://localhost:6500',
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },
@@ -22,5 +28,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    exclude: ['@shared'],
   },
 });

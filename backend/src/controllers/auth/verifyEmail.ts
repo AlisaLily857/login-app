@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { prisma } from '../utils/prisma';
-import { validate } from '../middleware/validate';
+import { prisma } from '../../utils/prisma';
+import { validate } from '../../middleware/validate';
 
 export const verifyEmail = [
   body('email').isEmail().normalizeEmail(),

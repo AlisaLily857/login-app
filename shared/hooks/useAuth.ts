@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { AuthState, User } from '../types';
 
-const STORAGE_KEY = '***';
-const TOKEN_KEY = '***';
-const REFRESH_TOKEN_KEY = '***';
+const STORAGE_KEY = 'login_app:auth_state';
+const TOKEN_KEY = 'login_app:access_token';
+const REFRESH_TOKEN_KEY = 'login_app:refresh_token';
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
@@ -35,7 +35,7 @@ export const useAuth = () => {
     }
   }, [authState]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, _password: string): Promise<boolean> => {
     try {
       // TODO: 替换为实际 API 调用
       const mockUser: User = {

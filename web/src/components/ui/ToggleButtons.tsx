@@ -1,6 +1,6 @@
 import React from 'react';
-import { useTheme } from '../hooks/useTheme';
-import { useLanguage } from '../hooks/useLanguage';
+import { useTheme } from '../../hooks/useTheme';
+import { useLanguage } from '../../hooks/useLanguage';
 
 export const ThemeToggle: React.FC = () => {
   const { isDark, setMode } = useTheme();

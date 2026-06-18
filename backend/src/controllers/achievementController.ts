@@ -117,22 +117,31 @@ export const getAchievements = [
         },
       });
 
-      const totalPoints = await prisma.userAchievement.aggregate({
+      const completedAchievements = await prisma.userAchievement.findMany({
         where: {
           userId,
           completed: true,
         },
-        _sum: {
-          progress: true,
+        include: {
+          achievement: {
+            select: {
+              points: true,
+            },
+          },
         },
       });
+
+      const totalPoints = completedAchievements.reduce(
+        (sum, ua) => sum + (ua.achievement?.points || 0),
+        0
+      );
 
       res.json({
         achievements: achievements.map((a) => ({
           ...a,
           userProgress: a.users[0] || null,
         })),
-        totalPoints: totalPoints._sum.progress || 0,
+        totalPoints,
       });
     } catch (error) {
       console.error('获取成就错误:', error);

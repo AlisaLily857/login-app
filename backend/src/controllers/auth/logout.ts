@@ -1,15 +1,13 @@
 import { Response } from 'express';
-import { prisma } from '../utils/prisma';
-import { AuthRequest } from '../middleware/auth';
+import { prisma } from '../../utils/prisma';
+import { AuthRequest } from '../../middleware/auth';
 
 export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
+    // 吊销当前用户的所有 refresh token
+    if (req.user?.id) {
       await prisma.refreshToken.updateMany({
-        where: { token },
+        where: { userId: req.user.id },
         data: { isRevoked: true },
       });
     }

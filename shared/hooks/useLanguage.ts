@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = '***';
+const STORAGE_KEY = 'login_app:language';
 
 const translations = {
   zh: {
@@ -227,12 +227,12 @@ type LanguageCode = keyof typeof translations;
 
 export const useLanguage = () => {
   const [lang, setLang] = useState<LanguageCode>(() => {
-    const stored = localStorage.getItem('***') as LanguageCode;
+    const stored = localStorage.getItem(STORAGE_KEY) as LanguageCode;
     return stored || 'zh';
   });
 
   useEffect(() => {
-    localStorage.setItem('***', lang);
+    localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.setAttribute('lang', lang);
   }, [lang]);
 

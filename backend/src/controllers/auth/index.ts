@@ -1,7 +1,7 @@
-export { register } from './auth/register';
-export { login } from './auth/login';
-export { refreshToken } from './auth/refreshToken';
-export { logout } from './auth/logout';
-export { sendVerificationCode } from './auth/sendVerificationCode';
-export { verifyEmail } from './auth/verifyEmail';
-export { getCurrentUser } from './auth/getCurrentUser';
+export { register } from './register';
+export { login } from './login';
+export { refreshToken } from './refreshToken';
+export { logout } from './logout';
+export { sendVerificationCode } from './sendVerificationCode';
+export { verifyEmail } from './verifyEmail';
+export { getCurrentUser } from './getCurrentUser';

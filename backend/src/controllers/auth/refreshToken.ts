@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { prisma } from '../utils/prisma';
-import { verifyToken, generateAccessToken } from '../utils/auth';
+import { prisma } from '../../utils/prisma';
+import { verifyToken, generateAccessToken } from '../../utils/auth';
 
 export const refreshToken = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -18,7 +18,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     const storedToken = await prisma.refreshToken.findUnique({ where: { token: refreshToken } });
-    if (!storedToken || storedToken.isRevoked) {
+    if (!storedToken || storedToken.isRevoked || storedToken.expiresAt < new Date()) {
       res.status(401).json({ error: '刷新令牌已失效' });
       return;
     }

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { prisma } from '../utils/prisma';
-import { comparePassword, generateAccessToken, generateRefreshToken, isAccountLocked } from '../utils/auth';
-import { validate } from '../middleware/validate';
+import { prisma } from '../../utils/prisma';
+import { comparePassword, generateAccessToken, generateRefreshToken, isAccountLocked } from '../../utils/auth';
+import { validate } from '../../middleware/validate';
 
 export const login = [
   body('email').isEmail().normalizeEmail().withMessage('请输入有效的邮箱地址'),

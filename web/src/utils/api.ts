@@ -30,7 +30,7 @@ const clearToken = (): void => {
 };
 
 // 核心请求函数
-async function request<T>(endpoint: string, config: RequestConfig = {}): Promise<T> {
+async function request(endpoint: string, config: RequestConfig = {}): Promise<any> {
   const { params, ...restConfig } = config;
   
   // 构建 URL
@@ -68,7 +68,7 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
 
   try {
     const response = await fetch(url, finalConfig);
-    const data: ApiResponse<T> = await response.json();
+    const data: ApiResponse = await response.json();
 
     if (!response.ok) {
       // 处理特定错误码
@@ -88,7 +88,7 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
       throw new Error(data.error || '请求失败');
     }
 
-    return data as T;
+    return data;
   } catch (error) {
     if (error instanceof Error) {
       throw error;
@@ -125,37 +125,37 @@ async function refreshAccessToken(): Promise<boolean> {
 
 // HTTP 方法封装
 export const api = {
-  get: <T>(endpoint: string, params?: Record<string, string>) =>
-    request<T>(endpoint, { method: 'GET', params }),
+  get: (endpoint: string, params?: Record<string, string>) =>
+    request(endpoint, { method: 'GET', params }),
 
-  post: <T>(endpoint: string, body: any) =>
-    request<T>(endpoint, {
+  post: (endpoint: string, body: any) =>
+    request(endpoint, {
       method: 'POST',
       body: JSON.stringify(body),
     }),
 
-  put: <T>(endpoint: string, body: any) =>
-    request<T>(endpoint, {
+  put: (endpoint: string, body: any) =>
+    request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(body),
     }),
 
-  delete: <T>(endpoint: string) =>
-    request<T>(endpoint, { method: 'DELETE' }),
+  delete: (endpoint: string) =>
+    request(endpoint, { method: 'DELETE' }),
 };
 
 // 认证相关 API
 export const authApi = {
   register: (data: { email: string; password: string; username: string; phone?: string }) =>
-    api.post<{ user: any; tokens: { accessToken: string; refreshToken: string } }>('/auth/register', data),
+    api.post('/auth/register', data),
 
   login: (data: { email: string; password: string }) =>
-    api.post<{ user: any; tokens: { accessToken: string; refreshToken: string } }>('/auth/login', data),
+    api.post('/auth/login', data),
 
   logout: () => api.post('/auth/logout', {}),
 
   refreshToken: (refreshToken: string) =>
-    api.post<{ accessToken: string }>('/auth/refresh-token', { refreshToken }),
+    api.post('/auth/refresh-token', { refreshToken }),
 
   sendVerificationCode: (data: { email: string; type: string }) =>
     api.post('/auth/send-verification-code', data),
@@ -163,7 +163,7 @@ export const authApi = {
   verifyEmail: (data: { email: string; code: string }) =>
     api.post('/auth/verify-email', data),
 
-  getCurrentUser: () => api.get<{ user: any }>('/auth/me'),
+  getCurrentUser: () => api.get('/auth/me'),
 };
 
 // 用户相关 API
@@ -180,7 +180,7 @@ export const userApi = {
   getDevices: () => api.get('/user/devices'),
   removeDevice: (deviceId: string) => api.delete(`/user/devices/${deviceId}`),
   trustDevice: (deviceId: string) => api.post(`/user/devices/${deviceId}/trust`, {}),
-  deleteAccount: (data: { password: string }) => api.delete('/user/account'),
+  deleteAccount: () => api.delete('/user/account'),
 };
 
 // 管理后台 API

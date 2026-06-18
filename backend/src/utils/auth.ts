@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import crypto from 'crypto';
 import { prisma } from './prisma';
 import config from '../config';
 
@@ -22,7 +23,7 @@ export const generateAccessToken = (userId: string): string => {
   return jwt.sign(
     { userId, type: 'access' },
     config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn }
+    { expiresIn: config.jwt.expiresIn as any }
   );
 };
 
@@ -30,7 +31,7 @@ export const generateRefreshToken = (userId: string): string => {
   return jwt.sign(
     { userId, type: 'refresh', jti: uuidv4() },
     config.jwt.refreshSecret,
-    { expiresIn: config.jwt.refreshExpiresIn }
+    { expiresIn: config.jwt.refreshExpiresIn as any }
   );
 };
 
@@ -57,10 +58,9 @@ export const generateVerificationCode = (): string => {
 
 // 设备指纹
 export const generateDeviceFingerprint = (userAgent: string, ip: string): string => {
-  const crypto = require('crypto');
   return crypto
     .createHash('sha256')
-    .update(`${userAgent}-${ip}-${Date.now()}`)
+    .update(`${userAgent}-${ip}`)
     .digest('hex');
 };
 

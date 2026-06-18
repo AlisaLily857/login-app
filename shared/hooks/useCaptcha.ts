@@ -12,12 +12,12 @@ export const useCaptcha = (config: Partial<CaptchaConfig> = {}) => {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
   
   const [attempts, setAttempts] = useState(() => {
-    const stored = sessionStorage.getItem('***');
+    const stored = sessionStorage.getItem('login_app:captcha_attempts');
     return stored ? parseInt(stored, 10) : 0;
   });
   
   const [isLocked, setIsLocked] = useState(() => {
-    const lockedUntil = sessionStorage.getItem('***');
+    const lockedUntil = sessionStorage.getItem('login_app:captcha_locked');
     return lockedUntil ? Date.now() < parseInt(lockedUntil, 10) : false;
   });
   
@@ -26,7 +26,7 @@ export const useCaptcha = (config: Partial<CaptchaConfig> = {}) => {
   const [userCaptcha, setUserCaptcha] = useState('');
 
   useEffect(() => {
-    sessionStorage.setItem('***', attempts.toString());
+    sessionStorage.setItem('login_app:captcha_attempts', attempts.toString());
     setShowCaptcha(attempts >= finalConfig.showAfterAttempts);
   }, [attempts, finalConfig.showAfterAttempts]);
 
@@ -49,7 +49,7 @@ export const useCaptcha = (config: Partial<CaptchaConfig> = {}) => {
       const newAttempts = prev + 1;
       if (newAttempts >= finalConfig.maxAttempts) {
         const lockoutTime = Date.now() + finalConfig.lockoutDuration * 60 * 1000;
-        sessionStorage.setItem('***', lockoutTime.toString());
+        sessionStorage.setItem('login_app:captcha_locked', lockoutTime.toString());
         setIsLocked(true);
       }
       return newAttempts;
@@ -59,8 +59,8 @@ export const useCaptcha = (config: Partial<CaptchaConfig> = {}) => {
   const resetAttempts = useCallback(() => {
     setAttempts(0);
     setIsLocked(false);
-    sessionStorage.removeItem('***');
-    sessionStorage.removeItem('***');
+    sessionStorage.removeItem('login_app:captcha_attempts');
+    sessionStorage.removeItem('login_app:captcha_locked');
     setShowCaptcha(false);
   }, []);
 

@@ -1,7 +1,7 @@
-export { updateProfile } from './user/updateProfile';
-export { changePassword } from './user/changePassword';
-export { getLoginHistory } from './user/getLoginHistory';
-export { getDevices } from './user/getDevices';
-export { removeDevice } from './user/removeDevice';
-export { trustDevice } from './user/trustDevice';
-export { deleteAccount } from './user/deleteAccount';
+export { updateProfile } from './updateProfile';
+export { changePassword } from './changePassword';
+export { getLoginHistory } from './getLoginHistory';
+export { getDevices } from './getDevices';
+export { removeDevice } from './removeDevice';
+export { trustDevice } from './trustDevice';
+export { deleteAccount } from './deleteAccount';

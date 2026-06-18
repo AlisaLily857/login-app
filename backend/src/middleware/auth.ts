@@ -1,15 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma';
 import config from '../config';
+import { AuthRequest } from '../types';
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
+export type { AuthRequest };
 
 // JWT 认证中间件
 export const authenticate = async (
@@ -31,6 +26,11 @@ export const authenticate = async (
       userId: string;
       type: string;
     };
+
+    if (!decoded) {
+      res.status(401).json({ error: '无效的令牌' });
+      return;
+    }
 
     if (decoded.type !== 'access') {
       res.status(401).json({ error: '无效的令牌类型' });
@@ -98,6 +98,11 @@ export const optionalAuth = async (
     const decoded = jwt.verify(token, config.jwt.secret) as {
       userId: string;
     };
+
+    if (!decoded) {
+      next();
+      return;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },

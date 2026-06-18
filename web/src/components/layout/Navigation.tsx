@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '../hooks/useAuth';
 
 type View = 'login' | 'register' | 'profile' | 'messages' | 'achievements' | 'stats';
 

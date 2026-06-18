@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authApi } from '../services/api';
-import { User, AuthTokens } from '../types';
+import { User } from '../types';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,8 +19,8 @@ export const useAuth = () => {
     }
 
     try {
-      const user = await authApi.getCurrentUser();
-      setUser(user);
+      const response = await authApi.getCurrentUser();
+      setUser(response.user);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -34,8 +34,8 @@ export const useAuth = () => {
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await authApi.login(email, password);
-      localStorage.setItem('access_token', response.accessToken);
-      localStorage.setItem('refresh_token', response.refreshToken);
+      localStorage.setItem('access_token', response.tokens.accessToken);
+      localStorage.setItem('refresh_token', response.tokens.refreshToken);
       setUser(response.user);
       setIsAuthenticated(true);
       return true;
@@ -45,13 +45,13 @@ export const useAuth = () => {
     }
   }, []);
 
-  const register = useCallback(async (data: { email: string; password: string; username: string; name?: string }): Promise<boolean> => {
+  const register = useCallback(async (data: { email: string; password: string; username: string; name?: string }): Promise<{ user: User; tokens: { accessToken: string; refreshToken: string } } | null> => {
     try {
-      await authApi.register(data);
-      return true;
+      const response = await authApi.register(data);
+      return response;
     } catch (error) {
       console.error('Register failed:', error);
-      return false;
+      return null;
     }
   }, []);
 
@@ -81,5 +81,7 @@ export const useAuth = () => {
     logout,
     updateUser,
     checkAuth,
+    setUser,
+    setIsAuthenticated,
   };
 };

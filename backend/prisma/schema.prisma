@@ -394,3 +394,10 @@ enum NotificationType {
   SYSTEM_UPDATE
   PROMOTION
 }
+
+enum VerificationType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  MFA_SETUP
+  ACCOUNT_RECOVERY
+}

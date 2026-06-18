@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api } from "../utils/api";
 
 // 认证 API
 export const authApi = {

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useToast } from '../hooks/useToast';
-import { authApi } from '../services/api';
+import { useToast } from '@shared/hooks/useToast';
 import './LoginForm.css';
 
 interface LoginFormProps {

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { useToast } from './hooks/useToast';
+import { useToast } from '@shared/hooks/useToast';
 import { useLanguage } from './hooks/useLanguage';
 import { useTheme } from './hooks/useTheme';
 import { ThemeToggle, LanguageToggle } from './components/ui/ToggleButtons';
 import { Navigation } from './components/layout/Navigation';
 import { ProfileView } from './components/pages/ProfileView';
 import LoginForm from './components/forms/LoginForm';
-import RegisterForm from './components/forms/RegisterForm';
+import RegisterForm from './components/RegisterForm';
 import MessageCenter from './components/MessageCenter';
 import Achievements from './components/Achievements';
 import StatsDashboard from './components/StatsDashboard';
@@ -18,7 +18,7 @@ type View = 'login' | 'register' | 'profile' | 'messages' | 'achievements' | 'st
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('login');
-  const { isAuthenticated, user, login, register, logout } = useAuth();
+  const { isAuthenticated, login, register, logout, setUser, setIsAuthenticated } = useAuth();
   const { showToast } = useToast();
   const { t } = useLanguage();
   const { isDark } = useTheme();
@@ -34,11 +34,19 @@ const App: React.FC = () => {
   };
 
   const handleRegister = async (data: any) => {
-    const success = await register(data);
-    if (success) {
-      showToast('success', '注册成功！');
-      setCurrentView('login');
-    } else {
+    try {
+      const result = await register(data);
+      if (result) {
+        localStorage.setItem('access_token', result.tokens.accessToken);
+        localStorage.setItem('refresh_token', result.tokens.refreshToken);
+        setUser(result.user);
+        setIsAuthenticated(true);
+        showToast('success', '注册成功！');
+        setCurrentView('profile');
+      } else {
+        showToast('error', '注册失败');
+      }
+    } catch (error) {
       showToast('error', '注册失败');
     }
   };

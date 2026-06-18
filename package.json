@@ -9,14 +9,15 @@
     "desktop"
   ],
   "scripts": {
-    "web": "cd web && npm start",
+    "web": "cd web && npm run dev",
     "web:build": "cd web && npm run build",
     "mobile": "cd mobile && npx react-native start",
     "mobile:android": "cd mobile && npx react-native run-android",
     "desktop": "cd desktop && npm start",
     "desktop:build": "cd desktop && npm run build",
-    "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "backend": "cd backend && npm run dev",
+    "backend:build": "cd backend && npm run build",
+    "typecheck": "cd backend && npx tsc --noEmit && cd ../web && npx tsc --noEmit"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

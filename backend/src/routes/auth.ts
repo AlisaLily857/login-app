@@ -7,7 +7,7 @@ import {
   sendVerificationCode,
   verifyEmail,
   getCurrentUser,
-} from '../controllers/authController';
+} from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 import { loginLimiter, registerLimiter, verificationLimiter, checkAccountLock } from '../middleware/rateLimit';
 

@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+
 const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow;
@@ -11,17 +12,17 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
     },
     icon: path.join(__dirname, '../assets/icon.png'),
     show: false,
-    titleBarStyle: 'default'
+    titleBarStyle: 'default',
   });
 
   // 加载应用
-  const startUrl = isDev 
+  const startUrl = isDev
     ? 'http://localhost:5173'  // 开发模式加载 Vite 开发服务器
     : `file://${path.join(__dirname, '../build/index.html')}`;  // 生产模式加载构建文件
 
