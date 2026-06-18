@@ -51,40 +51,78 @@
   transform: translateY(-1px);
 }
 
+.app-nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+}
+
+.nav-item {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.nav-item.logout {
+  margin-left: auto;
+  color: #e74c3c;
+}
+
+.nav-item.logout:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
 .app-main {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* 个人资料页 */
-.profile-container {
-  max-width: 600px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-}
-
-.app.dark .profile-container {
-  background: #16213e;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .profile-header {
-  text-align: center;
-  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .profile-avatar {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 16px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .profile-avatar img {
@@ -94,41 +132,33 @@
 }
 
 .avatar-placeholder {
-  font-size: 40px;
+  font-size: 32px;
   color: white;
   font-weight: 700;
 }
 
-.profile-header h2 {
-  margin: 0 0 8px;
-  font-size: 24px;
+.profile-info h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
 }
 
-.profile-header p {
+.profile-info p {
   margin: 0;
   color: #666;
 }
 
-.app.dark .profile-header p {
-  color: #aaa;
-}
-
 .profile-stats {
   display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.app.dark .profile-stats {
-  background: #0f3460;
+  gap: 16px;
 }
 
 .stat-item {
+  background: white;
+  padding: 16px 24px;
+  border-radius: 12px;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
 }
 
 .stat-value {
@@ -140,53 +170,18 @@
 
 .stat-label {
   display: block;
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   margin-top: 4px;
 }
 
-.app.dark .stat-label {
-  color: #aaa;
-}
-
-.profile-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.action-button {
-  padding: 12px 24px;
-  border: 2px solid #e1e1e1;
-  border-radius: 8px;
-  background: white;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.action-button:hover {
-  border-color: #667eea;
-  color: #667eea;
-  transform: translateY(-1px);
-}
-
-.action-button.danger {
-  border-color: #e74c3c;
-  color: #e74c3c;
-}
-
-.action-button.danger:hover {
-  background: #e74c3c;
-  color: white;
-}
-
-.app.dark .action-button {
+.dark .profile-header,
+.dark .stat-item {
   background: #16213e;
-  border-color: #0f3460;
-  color: #eee;
+}
+
+.dark .profile-info p {
+  color: #aaa;
 }
 
 /* Toast 通知 */
@@ -253,17 +248,6 @@
   }
 }
 
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
 /* 响应式 */
 @media (max-width: 768px) {
   .app-header {
@@ -274,11 +258,25 @@
     font-size: 18px;
   }
   
-  .profile-container {
-    padding: 24px 16px;
+  .app-nav {
+    padding: 8px 16px;
+  }
+  
+  .app-main {
+    padding: 16px;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
   }
   
   .profile-stats {
-    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-item {
+    flex: 1;
+    min-width: 100px;
   }
 }

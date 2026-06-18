@@ -1,0 +1,182 @@
+.stats-dashboard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-dashboard h2 {
+  margin: 0 0 24px;
+  font-size: 24px;
+}
+
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-card.security {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.stats-section {
+  margin-bottom: 32px;
+}
+
+.stats-section h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.device-distribution {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.device-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  min-width: 150px;
+}
+
+.device-icon {
+  font-size: 32px;
+}
+
+.device-type {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.device-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.login-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.login-time {
+  font-size: 14px;
+  color: #666;
+  min-width: 150px;
+}
+
+.login-details {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.login-ip,
+.login-location,
+.login-device {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: white;
+  border-radius: 4px;
+  color: #666;
+}
+
+.hourly-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hour-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hour-label {
+  width: 50px;
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+.hour-progress {
+  flex: 1;
+  height: 20px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.hour-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.hour-count {
+  width: 30px;
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.dark .stats-dashboard {
+  background: #16213e;
+}
+
+.dark .stats-section h3 {
+  color: #eee;
+}
+
+.dark .device-item,
+.dark .login-item {
+  background: #1a1a2e;
+}
+
+.dark .hour-progress {
+  background: #1a1a2e;
+}

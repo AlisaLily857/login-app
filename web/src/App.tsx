@@ -5,14 +5,18 @@ import { useLanguage } from '@shared/hooks/useLanguage';
 import { useTheme } from '@shared/hooks/useTheme';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
+import BiometricAuth from './components/BiometricAuth';
+import MessageCenter from './components/MessageCenter';
+import Achievements from './components/Achievements';
+import StatsDashboard from './components/StatsDashboard';
 import { authApi } from './utils/api';
 import './App.css';
 
-type View = 'login' | 'register' | 'profile';
+type View = 'login' | 'register' | 'profile' | 'messages' | 'achievements' | 'stats';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('login');
-  const { isAuthenticated, user, login, register, logout, fetchCurrentUser } = useAuth();
+  const { isAuthenticated, user, login, register, logout } = useAuth();
   const { showToast } = useToast();
   const { t, lang, toggleLanguage } = useLanguage();
   const { theme, isDark, setMode } = useTheme();
@@ -48,24 +52,11 @@ const App: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    showToast('info', 'Google 登录');
-    // TODO: 实现 Google OAuth 跳转
-  };
-
-  const handleGitHubLogin = () => {
-    showToast('info', 'GitHub 登录');
-    // TODO: 实现 GitHub OAuth 跳转
-  };
-
-  const handleWeChatLogin = () => {
-    showToast('info', '微信登录');
-    // TODO: 实现微信 OAuth 跳转
-  };
-
-  const handlePhoneLogin = () => {
-    showToast('info', '手机号登录');
-    // TODO: 实现手机号登录
+  const handleBiometricSuccess = (tokens: { accessToken: string; refreshToken: string }) => {
+    localStorage.setItem('access_token', tokens.accessToken);
+    localStorage.setItem('refresh_token', tokens.refreshToken);
+    showToast('success', '生物识别登录成功！');
+    setCurrentView('profile');
   };
 
   const handleLogout = async () => {
@@ -86,8 +77,40 @@ const App: React.FC = () => {
     </button>
   );
 
+  const Navigation = () => (
+    <nav className="app-nav">
+      <button 
+        className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
+        onClick={() => setCurrentView('profile')}
+      >
+        👤 个人资料
+      </button>
+      <button 
+        className={`nav-item ${currentView === 'messages' ? 'active' : ''}`}
+        onClick={() => setCurrentView('messages')}
+      >
+        📬 消息中心
+      </button>
+      <button 
+        className={`nav-item ${currentView === 'achievements' ? 'active' : ''}`}
+        onClick={() => setCurrentView('achievements')}
+      >
+        🏆 成就
+      </button>
+      <button 
+        className={`nav-item ${currentView === 'stats' ? 'active' : ''}`}
+        onClick={() => setCurrentView('stats')}
+      >
+        📊 统计
+      </button>
+      <button className="nav-item logout" onClick={handleLogout}>
+        🚪 退出
+      </button>
+    </nav>
+  );
+
   const ProfileView = () => (
-    <div className="profile-container">
+    <div className="profile-view">
       <div className="profile-header">
         <div className="profile-avatar">
           {user?.avatar ? (
@@ -96,10 +119,12 @@ const App: React.FC = () => {
             <div className="avatar-placeholder">{user?.name?.[0] || 'U'}</div>
           )}
         </div>
-        <h2>{user?.name || user?.username}</h2>
-        <p>{user?.email}</p>
+        <div className="profile-info">
+          <h2>{user?.name || user?.username}</h2>
+          <p>{user?.email}</p>
+        </div>
       </div>
-      
+
       <div className="profile-stats">
         <div className="stat-item">
           <span className="stat-value">{user?.loginCount || 0}</span>
@@ -111,17 +136,10 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div className="profile-actions">
-        <button className="action-button" onClick={() => showToast('info', '功能开发中')}>
-          编辑资料
-        </button>
-        <button className="action-button" onClick={() => showToast('info', '功能开发中')}>
-          安全设置
-        </button>
-        <button className="action-button danger" onClick={handleLogout}>
-          退出登录
-        </button>
-      </div>
+      <BiometricAuth 
+        email={user?.email || ''} 
+        onSuccess={handleBiometricSuccess} 
+      />
     </div>
   );
 
@@ -135,25 +153,34 @@ const App: React.FC = () => {
         </div>
       </header>
 
+      {isAuthenticated && <Navigation />}
+
       <main className="app-main">
-        {isAuthenticated && currentView === 'profile' ? (
-          <ProfileView />
-        ) : currentView === 'register' ? (
-          <RegisterForm
-            onSubmit={handleRegister}
-            onLogin={() => setCurrentView('login')}
-            onVerifyEmail={handleVerifyEmail}
-          />
+        {!isAuthenticated ? (
+          currentView === 'register' ? (
+            <RegisterForm
+              onSubmit={handleRegister}
+              onLogin={() => setCurrentView('login')}
+              onVerifyEmail={handleVerifyEmail}
+            />
+          ) : (
+            <LoginForm
+              onSubmit={handleLogin}
+              onForgotPassword={() => showToast('info', '功能开发中')}
+              onGoogleLogin={() => showToast('info', 'Google 登录')}
+              onGitHubLogin={() => showToast('info', 'GitHub 登录')}
+              onWeChatLogin={() => showToast('info', '微信登录')}
+              onPhoneLogin={() => showToast('info', '手机号登录')}
+              onRegister={() => setCurrentView('register')}
+            />
+          )
         ) : (
-          <LoginForm
-            onSubmit={handleLogin}
-            onForgotPassword={() => showToast('info', '功能开发中')}
-            onGoogleLogin={handleGoogleLogin}
-            onGitHubLogin={handleGitHubLogin}
-            onWeChatLogin={handleWeChatLogin}
-            onPhoneLogin={handlePhoneLogin}
-            onRegister={() => setCurrentView('register')}
-          />
+          <>
+            {currentView === 'profile' && <ProfileView />}
+            {currentView === 'messages' && <MessageCenter />}
+            {currentView === 'achievements' && <Achievements />}
+            {currentView === 'stats' && <StatsDashboard />}
+          </>
         )}
       </main>
     </div>

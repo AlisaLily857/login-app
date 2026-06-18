@@ -1,0 +1,83 @@
+.biometric-auth {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.biometric-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.biometric-auth h3 {
+  margin: 0 0 16px;
+  color: #333;
+  font-size: 18px;
+}
+
+.biometric-description {
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.biometric-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.biometric-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.biometric-button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.biometric-button.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.biometric-button.danger {
+  background: #fee;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+}
+
+.biometric-button.danger:hover:not(:disabled) {
+  background: #e74c3c;
+  color: white;
+}
+
+.biometric-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.not-supported {
+  color: #e74c3c;
+  font-size: 14px;
+}
+
+.dark .biometric-auth {
+  background: #16213e;
+}
+
+.dark .biometric-auth h3 {
+  color: #eee;
+}
+
+.dark .biometric-description {
+  color: #aaa;
+}
