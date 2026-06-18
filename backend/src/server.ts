@@ -8,9 +8,7 @@ import biometricRoutes from './routes/biometric';
 import messageRoutes from './routes/messages';
 import statsRoutes from './routes/stats';
 import achievementRoutes from './routes/achievements';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import config from './config';
 
 const app: Application = express();
 
@@ -54,7 +52,7 @@ app.use((req, res) => {
 // 错误处理
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001;
+const PORT = config.port;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

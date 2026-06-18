@@ -1,137 +1,85 @@
 import { useState, useEffect, useCallback } from 'react';
-import { authApi, userApi, clearToken } from '../utils/api';
-import { User, AuthState } from '@shared/types';
-
-const STORAGE_KEY = '***';
+import { authApi } from '../services/api';
+import { User, AuthTokens } from '../types';
 
 export const useAuth = () => {
-  const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    user: null,
-    token: null,
-    refreshToken: null,
-    expiresAt: null,
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初始化时检查本地存储
   useEffect(() => {
-    const initAuth = () => {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
-          setAuthState(parsed);
-        } else {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      }
-      setIsLoading(false);
-    };
-    initAuth();
+    checkAuth();
   }, []);
 
-  // 持久化存储
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(authState));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
+  const checkAuth = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setIsLoading(false);
+      return;
     }
-  }, [authState]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await authApi.login({ email, password });
-      
-      const newState: AuthState = {
-        isAuthenticated: true,
-        user: response.user,
-        token: response.tokens.accessToken,
-        refreshToken: response.tokens.refreshToken,
-        expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
-      };
+      const user = await authApi.getCurrentUser();
+      setUser(user);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      setAuthState(newState);
-      localStorage.setItem('access_token', response.tokens.accessToken);
-      localStorage.setItem('refresh_token', response.tokens.refreshToken);
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await authApi.login(email, password);
+      localStorage.setItem('access_token', response.accessToken);
+      localStorage.setItem('refresh_token', response.refreshToken);
+      setUser(response.user);
+      setIsAuthenticated(true);
       return true;
     } catch (error) {
       console.error('Login failed:', error);
       return false;
     }
-  };
+  }, []);
 
-  const register = async (data: {
-    email: string;
-    password: string;
-    username: string;
-    phone?: string;
-  }): Promise<boolean> => {
+  const register = useCallback(async (data: { email: string; password: string; username: string; name?: string }): Promise<boolean> => {
     try {
-      const response = await authApi.register(data);
-      
-      const newState: AuthState = {
-        isAuthenticated: true,
-        user: response.user,
-        token: response.tokens.accessToken,
-        refreshToken: response.tokens.refreshToken,
-        expiresAt: Date.now() + 15 * 60 * 1000,
-      };
-
-      setAuthState(newState);
-      localStorage.setItem('access_token', response.tokens.accessToken);
-      localStorage.setItem('refresh_token', response.tokens.refreshToken);
+      await authApi.register(data);
       return true;
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Register failed:', error);
       return false;
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await authApi.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      clearToken();
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        refreshToken: null,
-        expiresAt: null,
-      });
-    }
-  };
-
-  const updateUser = (updates: Partial<User>) => {
-    setAuthState(prev => ({
-      ...prev,
-      user: prev.user ? { ...prev.user, ...updates } : null,
-    }));
-  };
-
-  const fetchCurrentUser = useCallback(async () => {
-    try {
-      const response = await authApi.getCurrentUser();
-      setAuthState(prev => ({
-        ...prev,
-        user: response.user,
-      }));
-    } catch (error) {
-      console.error('Fetch user failed:', error);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      setUser(null);
+      setIsAuthenticated(false);
     }
   }, []);
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...updates } : null);
+  }, []);
+
   return {
-    ...authState,
+    isAuthenticated,
+    user,
     isLoading,
     login,
     register,
     logout,
     updateUser,
-    fetchCurrentUser,
+    checkAuth,
   };
 };
