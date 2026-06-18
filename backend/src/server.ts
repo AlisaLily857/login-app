@@ -4,6 +4,10 @@ import { errorHandler } from './middleware/validate';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import adminRoutes from './routes/admin';
+import biometricRoutes from './routes/biometric';
+import messageRoutes from './routes/messages';
+import statsRoutes from './routes/stats';
+import achievementRoutes from './routes/achievements';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -27,6 +31,10 @@ app.use(auditLog);                     // 11. 审计日志
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/biometric', biometricRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 // 健康检查
 app.get('/health', (req, res) => {

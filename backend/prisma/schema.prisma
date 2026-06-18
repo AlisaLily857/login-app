@@ -17,6 +17,11 @@ model User {
   phone     String?  @unique
   bio       String?
   
+  // WebAuthn 生物识别
+  webauthnId        String?
+  webauthnPublicKey String?
+  webauthnCounter   Int?    @default(0)
+  
   // 认证状态
   isEmailVerified Boolean @default(false)
   isPhoneVerified Boolean @default(false)
@@ -50,6 +55,9 @@ model User {
   loginHistories LoginHistory[]
   devices       Device[]
   refreshTokens RefreshToken[]
+  notifications Notification[]
+  messages      Message[]
+  achievements  UserAchievement[]
   
   @@map("users")
 }
@@ -286,10 +294,103 @@ enum DeviceType {
   UNKNOWN
 }
 
-enum VerificationType {
-  EMAIL_VERIFICATION
-  PHONE_VERIFICATION
-  PASSWORD_RESET
-  MFA_SETUP
-  ACCOUNT_DELETION
+// 消息模型
+model Message {
+  id        String   @id @default(uuid())
+  userId    String
+  type      MessageType
+  title     String
+  content   String
+  
+  // 状态
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  // 操作
+  actionUrl String?
+  actionText String?
+  
+  // 元数据
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, isRead, createdAt])
+  @@map("messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  
+  // 通知设置
+  type      NotificationType
+  email     Boolean  @default(true)
+  push      Boolean  @default(true)
+  sms       Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, type])
+  @@map("notifications")
+}
+
+// 成就系统
+model Achievement {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String
+  icon        String?
+  points      Int      @default(0)
+  
+  // 条件
+  condition   Json     // { type: 'login_count', value: 10 }
+  
+  createdAt   DateTime @default(now())
+  
+  users       UserAchievement[]
+  
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  
+  // 进度
+  progress      Int      @default(0)
+  completed     Boolean  @default(false)
+  completedAt   DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+enum MessageType {
+  SYSTEM
+  SECURITY
+  ACTIVITY
+  PROMOTION
+}
+
+enum NotificationType {
+  LOGIN
+  PASSWORD_CHANGE
+  NEW_DEVICE
+  SECURITY_ALERT
+  SYSTEM_UPDATE
+  PROMOTION
 }
